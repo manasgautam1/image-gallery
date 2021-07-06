@@ -1,23 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
-
+import React, { useState, useEffect } from 'react';
+import Header from './components/Header';
+import ImageCard from './components/ImageCard';
 function App() {
+  const [keyword, setKeyword] = useState('');
+  const [isLoading, setisLoading] = useState(true);
+  const [images, setImages] = useState([]);
+
+  const handleSubmit = (text) => {
+    setKeyword(text);
+  };
+  useEffect(() => {
+    fetch(
+      `https://pixabay.com/api/?key=${process.env.REACT_APP_API_KEY}&q=${keyword}&image_typre=photo&pretty=true`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setImages(data.hits);
+        setisLoading(false);
+      })
+      .catch((err) => console.log(err));
+  }, [keyword]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='container'>
+      <Header handleSubmit={handleSubmit} />
+      {isLoading ? (
+        <h1>Loading Images</h1>
+      ) : (
+        <div className='row'>
+          {images.map((image, index) => (
+            <ImageCard key={index} image={image} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
